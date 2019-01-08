@@ -10,24 +10,69 @@ app.get('/listUsers', function (req, res) {
   })
 });
 app.get('/showbyID/:id', function (req, res) {
-  var id =parseInt(req.params.id);
+  var id = parseInt(req.params.id);
   console.log(id);
   fs.readFile(__dirname + "/" + "users.json", 'utf8', function (err, data) {
 
     var obj = JSON.parse(data);
     finaldata = Object.values(obj);
 
-    show = finaldata.filter(dd => dd.id===id)
+    show = finaldata.filter(dd => dd.id === id)
     console.log(show[0]);
-   
-    showfinal={};
-    showfinal[`user$id`]=show[0];
-       console.log(showfinal);
-       res.send(showfinal);
-       res.end();
+
+    showfinal = {};
+
+    showfinal[`user${id}`] = show[0];
+    console.log(showfinal);
+    res.send(showfinal);
+    res.end();
   });
 
 
+});
+app.post('/addMultiUser', function (req, res) {
+  // First read existing users.
+  fs.readFile(__dirname + "/" + "users.json", 'utf8', function (err, dataFile) {
+
+    var data = JSON.parse(dataFile);
+    var count = Object.keys(data).length;
+    var dataUser = req.body
+
+    dataUser.map((user, index) => {
+      data[`user${count + index + 1}`] = {
+        name: user.name,
+        password: user.password,
+        profession: user.profession,
+        id: count + (index + 1)
+      }
+      return data
+    })
+    res.end(JSON.stringify(data));
+  });
+});
+
+app.post('/addUser', function (req, res) {
+  // First read existing users.
+  fs.readFile(__dirname + "/" + "users.json", 'utf8', function (err, dataFile) {
+    var data = JSON.parse(dataFile);
+    var count = Object.keys(data).length;
+    var dataUser = req.body
+    dataUser.id = count + 1
+    data[`user${count + 1}`] = dataUser
+
+    res.end(JSON.stringify(data));
+  });
+})
+
+app.delete('/deleteUser/:id', function (req, res) {
+  var id = parseInt(req.params.id)
+  fs.readFile(__dirname + "/" + "users.json", "utf8", function (err, dataFile) {
+    var data = JSON.parse(dataFile);
+    var convertData = Object.values(data);
+    var deletedData = convertData.filter(dd => dd.id !== id)
+
+    res.end(JSON.stringify(deletedData));
+  })
 });
 
 
